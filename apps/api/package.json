@@ -11,9 +11,11 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "elysia": "^1.2.14",
+    "@better-auth/drizzle-adapter": "^1.7.3",
     "@elysiajs/cors": "^1.2.0",
-    "@openeer/db": "workspace:*"
+    "@openeer/db": "workspace:*",
+    "better-auth": "^1.7.3",
+    "elysia": "^1.2.14"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

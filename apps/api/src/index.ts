@@ -1,8 +1,22 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
+import { auth } from "./auth";
 
 export const app = new Elysia()
-  .use(cors())
+  .use(
+    cors({
+      origin: [
+        "http://localhost:5173",
+        "http://localhost:8088",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8088",
+      ],
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    })
+  )
+  .all("/api/auth/*", ({ request }) => auth.handler(request))
   .get("/health", () => ({ status: "ok" }));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3050;

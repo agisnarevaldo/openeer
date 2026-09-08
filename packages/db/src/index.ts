@@ -1,2 +1,5 @@
-// packages/db entry point
-export const DB_VERSION = "0.1.0";
+import * as schema from "./schema";
+
+export * from "./client";
+export * from "./schema";
+export { schema };
