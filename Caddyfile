@@ -1,0 +1,13 @@
+:8088 {
+    handle /api/* {
+        reverse_proxy host.docker.internal:3050
+    }
+
+    handle /v1/* {
+        reverse_proxy host.docker.internal:3050
+    }
+
+    handle /* {
+        reverse_proxy host.docker.internal:5173
+    }
+}
