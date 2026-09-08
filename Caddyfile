@@ -1,4 +1,8 @@
 :8088 {
+    handle /health {
+        reverse_proxy host.docker.internal:3050
+    }
+
     handle /api/* {
         reverse_proxy host.docker.internal:3050
     }
