@@ -1,6 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { signUp } from "$lib/auth-client";
+  import { Button } from "$lib/components/ui/button";
+  import { Card } from "$lib/components/ui/card";
+  import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
 
   let name = $state("");
   let email = $state("");
@@ -21,7 +25,7 @@
       });
 
       if (res.error) {
-        errorMsg = res.error.message || "Failed to create account. Please try again.";
+        errorMsg = res.error.message || "Failed to register user. Please try again.";
       } else {
         goto("/dashboard");
       }
@@ -34,7 +38,7 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center p-4">
-  <div class="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-2xl">
+  <Card class="w-full max-w-md p-8 shadow-2xl">
     <div class="mb-6 text-center">
       <div class="inline-flex items-center justify-center gap-2 mb-2">
         <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white">
@@ -42,7 +46,7 @@
         </div>
         <span class="text-2xl font-bold tracking-tight">Openeer</span>
       </div>
-      <p class="text-sm text-muted-foreground">Create your developer gateway account</p>
+      <p class="text-sm text-muted-foreground">Register as a developer on Openeer</p>
     </div>
 
     {#if errorMsg}
@@ -53,56 +57,49 @@
 
     <form onsubmit={handleRegister} class="space-y-4">
       <div>
-        <label for="name" class="block text-sm font-medium mb-1.5">Full name</label>
-        <input
+        <Label for="name">Full name</Label>
+        <Input
           id="name"
           type="text"
           bind:value={name}
           required
           placeholder="Jane Doe"
-          class="w-full rounded-lg border border-border bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         />
       </div>
 
       <div>
-        <label for="email" class="block text-sm font-medium mb-1.5">Email address</label>
-        <input
+        <Label for="email">Email address</Label>
+        <Input
           id="email"
           type="email"
           bind:value={email}
           required
           placeholder="you@company.com"
-          class="w-full rounded-lg border border-border bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         />
       </div>
 
       <div>
-        <label for="password" class="block text-sm font-medium mb-1.5">Password</label>
-        <input
+        <Label for="password">Password</Label>
+        <Input
           id="password"
           type="password"
           bind:value={password}
           required
           minlength={8}
           placeholder="At least 8 characters"
-          class="w-full rounded-lg border border-border bg-secondary/50 px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        class="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 transition-all cursor-pointer"
-      >
-        {isLoading ? "Creating account..." : "Register"}
-      </button>
+      <Button type="submit" disabled={isLoading} class="w-full">
+        {isLoading ? "Registering..." : "Register"}
+      </Button>
     </form>
 
     <div class="mt-6 text-center text-sm text-muted-foreground">
-      Already have an account?
+      Already registered?
       <a href="/login" class="font-medium text-primary hover:underline ml-1">
         Sign in
       </a>
     </div>
-  </div>
+  </Card>
 </div>

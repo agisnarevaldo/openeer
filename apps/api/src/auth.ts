@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db, schema } from "@openeer/db";
+import { ALLOWED_ORIGINS } from "./constants";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -15,12 +16,7 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
   },
-  trustedOrigins: [
-    "http://localhost:5173",
-    "http://localhost:8088",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8088",
-  ],
+  trustedOrigins: ALLOWED_ORIGINS,
   advanced: {
     useSecureCookies: false,
   },

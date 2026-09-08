@@ -23,7 +23,7 @@
     </div>
 
     <div class="rounded-xl border border-border bg-card p-5">
-      <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Tenant</div>
+      <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Authenticated User</div>
       <div class="mt-2 text-lg font-semibold truncate">{$session.data?.user?.email}</div>
       <div class="mt-1 text-xs text-muted-foreground">Authenticated via Better Auth</div>
     </div>

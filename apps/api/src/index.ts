@@ -1,16 +1,12 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { auth } from "./auth";
+import { ALLOWED_ORIGINS } from "./constants";
 
 export const app = new Elysia()
   .use(
     cors({
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:8088",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8088",
-      ],
+      origin: ALLOWED_ORIGINS,
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
