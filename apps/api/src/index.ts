@@ -3,6 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { auth } from "./auth";
 import { ALLOWED_ORIGINS } from "./constants";
 import { keysRoutes } from "./routes/keys";
+import { logsRoutes } from "./routes/logs";
 import { chatCompletionsRoutes } from "./routes/chat-completions";
 
 export const app = new Elysia()
@@ -16,6 +17,7 @@ export const app = new Elysia()
   )
   .all("/api/auth/*", ({ request }) => auth.handler(request))
   .use(keysRoutes)
+  .use(logsRoutes)
   .use(chatCompletionsRoutes)
   .get("/health", () => ({ status: "ok" }));
 

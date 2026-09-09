@@ -1,19 +1,9 @@
 import { Elysia, t } from "elysia";
 import { and, desc, eq } from "drizzle-orm";
 import { db, apiKey } from "@openeer/db";
-import { auth } from "../auth";
 import { DEFAULT_RATE_LIMIT_RPM, generateApiKey } from "../lib/api-keys";
 import { invalidateCachedApiKey } from "../lib/api-key-cache";
-
-class UnauthorizedError extends Error {}
-
-async function requireUser(request: Request) {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session?.user) {
-    throw new UnauthorizedError();
-  }
-  return session.user;
-}
+import { UnauthorizedError, requireUser } from "../lib/session";
 
 export const keysRoutes = new Elysia({ prefix: "/api/keys" })
   .error({ UNAUTHORIZED: UnauthorizedError })

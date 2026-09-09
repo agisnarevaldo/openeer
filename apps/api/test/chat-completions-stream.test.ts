@@ -1,31 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { app } from "../src/index";
-
-async function registerAndSignIn(email: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/auth/sign-up/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Stream Test Developer",
-        email,
-        password: "securePassword123!",
-      }),
-    })
-  );
-  return res.headers.get("set-cookie") || "";
-}
-
-async function createApiKeyFor(cookie: string, name: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ name }),
-    })
-  );
-  return res.json();
-}
+import { registerAndSignIn, createApiKeyFor } from "./helpers";
 
 async function readSseEvents(res: Response): Promise<string[]> {
   const text = await res.text();

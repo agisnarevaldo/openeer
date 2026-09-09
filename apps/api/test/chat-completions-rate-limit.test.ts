@@ -1,35 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { app } from "../src/index";
-
-async function registerAndSignIn(email: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/auth/sign-up/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Rate Limit Test Developer",
-        email,
-        password: "securePassword123!",
-      }),
-    })
-  );
-  return res.headers.get("set-cookie") || "";
-}
-
-async function createApiKeyFor(
-  cookie: string,
-  name: string,
-  rateLimitRpm?: number
-) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ name, rateLimitRpm }),
-    })
-  );
-  return res.json();
-}
+import { registerAndSignIn, createApiKeyFor } from "./helpers";
 
 function sendChatRequest(apiKey: string) {
   return app.handle(

@@ -3,6 +3,7 @@ import type {
   ChatCompletionChunk,
   ChatCompletionRequest,
   ChatCompletionResult,
+  ChatCompletionUsage,
 } from "./types";
 
 const CHARS_PER_TOKEN = 4;
@@ -53,12 +54,14 @@ export class MockProvider implements AIProvider {
 
   async *chatCompletionStream(
     request: ChatCompletionRequest
-  ): AsyncIterable<ChatCompletionChunk> {
-    const { content } = this.createChatCompletion(request);
+  ): AsyncGenerator<ChatCompletionChunk, ChatCompletionUsage, void> {
+    const { content, usage } = this.createChatCompletion(request);
 
     for (const word of splitIntoWordChunks(content)) {
       await delay(STREAM_CHUNK_DELAY_MS);
       yield { content: word };
     }
+
+    return usage;
   }
 }

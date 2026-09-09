@@ -1,7 +1,13 @@
 import { MockProvider } from "./mock-provider";
 import type { AIProvider } from "./types";
 
-export type { AIProvider, ChatCompletionRequest, ChatCompletionResult, ChatMessage } from "./types";
+export type {
+  AIProvider,
+  ChatCompletionRequest,
+  ChatCompletionResult,
+  ChatCompletionUsage,
+  ChatMessage,
+} from "./types";
 export { MockProvider } from "./mock-provider";
 
 const mockProvider = new MockProvider();

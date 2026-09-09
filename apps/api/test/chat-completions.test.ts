@@ -1,32 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { app } from "../src/index";
 import { generateApiKey } from "../src/lib/api-keys";
-
-async function registerAndSignIn(email: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/auth/sign-up/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Chat Test Developer",
-        email,
-        password: "securePassword123!",
-      }),
-    })
-  );
-  return res.headers.get("set-cookie") || "";
-}
-
-async function createApiKeyFor(cookie: string, name: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ name }),
-    })
-  );
-  return res.json();
-}
+import { registerAndSignIn, createApiKeyFor } from "./helpers";
 
 describe("POST /v1/chat/completions", () => {
   it("rejects requests with no Authorization header", async () => {

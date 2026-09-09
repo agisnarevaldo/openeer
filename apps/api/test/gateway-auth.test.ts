@@ -5,32 +5,7 @@ import { app } from "../src/index";
 import { authenticateApiKey } from "../src/lib/gateway-auth";
 import { generateApiKey } from "../src/lib/api-keys";
 import { getCachedApiKey, setCachedApiKey } from "../src/lib/api-key-cache";
-
-async function registerAndSignIn(email: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/auth/sign-up/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Gateway Test Developer",
-        email,
-        password: "securePassword123!",
-      }),
-    })
-  );
-  return res.headers.get("set-cookie") || "";
-}
-
-async function createApiKeyFor(cookie: string, name: string) {
-  const res = await app.handle(
-    new Request("http://localhost:3050/api/keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Cookie: cookie },
-      body: JSON.stringify({ name }),
-    })
-  );
-  return res.json();
-}
+import { registerAndSignIn, createApiKeyFor } from "./helpers";
 
 describe("authenticateApiKey", () => {
   it("returns null when the Authorization header is missing", async () => {

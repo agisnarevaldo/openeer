@@ -29,7 +29,12 @@ export interface AIProvider {
   createChatCompletion(
     request: ChatCompletionRequest
   ): Promise<ChatCompletionResult> | ChatCompletionResult;
+  /**
+   * Yields content chunks and, once the stream finishes normally, returns
+   * the completion's usage — so callers who need usage for logging/billing
+   * don't have to make a second, redundant completion call.
+   */
   chatCompletionStream(
     request: ChatCompletionRequest
-  ): AsyncIterable<ChatCompletionChunk>;
+  ): AsyncGenerator<ChatCompletionChunk, ChatCompletionUsage, void>;
 }
