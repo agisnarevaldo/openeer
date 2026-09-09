@@ -16,7 +16,8 @@
     "@openeer/db": "workspace:*",
     "better-auth": "^1.7.3",
     "drizzle-orm": "0.39.3",
-    "elysia": "^1.2.14"
+    "elysia": "^1.2.14",
+    "ioredis": "^6.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.3"

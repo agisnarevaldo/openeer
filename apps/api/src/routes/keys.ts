@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, apiKey } from "@openeer/db";
 import { auth } from "../auth";
 import { DEFAULT_RATE_LIMIT_RPM, generateApiKey } from "../lib/api-keys";
+import { invalidateCachedApiKey } from "../lib/api-key-cache";
 
 class UnauthorizedError extends Error {}
 
@@ -95,12 +96,14 @@ export const keysRoutes = new Elysia({ prefix: "/api/keys" })
         .update(apiKey)
         .set({ isActive: false })
         .where(and(eq(apiKey.id, params.id), eq(apiKey.userId, user.id)))
-        .returning({ id: apiKey.id });
+        .returning({ id: apiKey.id, keyHash: apiKey.keyHash });
 
       if (!revoked) {
         set.status = 404;
         return { error: "API key not found" };
       }
+
+      await invalidateCachedApiKey(revoked.keyHash);
 
       return { success: true };
     },

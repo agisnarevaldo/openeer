@@ -3,6 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { auth } from "./auth";
 import { ALLOWED_ORIGINS } from "./constants";
 import { keysRoutes } from "./routes/keys";
+import { chatCompletionsRoutes } from "./routes/chat-completions";
 
 export const app = new Elysia()
   .use(
@@ -15,6 +16,7 @@ export const app = new Elysia()
   )
   .all("/api/auth/*", ({ request }) => auth.handler(request))
   .use(keysRoutes)
+  .use(chatCompletionsRoutes)
   .get("/health", () => ({ status: "ok" }));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3050;
