@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { app } from "../src/index";
 import { authenticateApiKey } from "../src/lib/gateway-auth";
 import { generateApiKey } from "../src/lib/api-keys";
-import { getCachedApiKey } from "../src/lib/api-key-cache";
+import { getCachedApiKey, setCachedApiKey } from "../src/lib/api-key-cache";
 
 async function registerAndSignIn(email: string) {
   const res = await app.handle(
@@ -132,5 +132,41 @@ describe("authenticateApiKey", () => {
       })
     );
     expect(second).toBeNull();
+  });
+
+  it("does not let a stale write re-cache a key as valid right after it is revoked", async () => {
+    const cookie = await registerAndSignIn(`gw_auth_race_${Date.now()}@openeer.local`);
+    const created = await createApiKeyFor(cookie, "Gateway Race Key");
+
+    const [row] = await db
+      .select({ keyHash: apiKey.keyHash })
+      .from(apiKey)
+      .where(eq(apiKey.id, created.id));
+
+    // Simulate an in-flight authenticateApiKey() call that read the key as
+    // valid from Postgres just before the revoke below, and only attempts
+    // to populate the cache afterward.
+    await app.handle(
+      new Request(`http://localhost:3050/api/keys/${created.id}`, {
+        method: "DELETE",
+        headers: { Cookie: cookie },
+      })
+    );
+
+    await setCachedApiKey(row.keyHash, {
+      userId: "stale-user-id",
+      keyId: created.id,
+      rateLimitRpm: 60,
+    });
+
+    const cached = await getCachedApiKey(row.keyHash);
+    expect(cached).toBeNull();
+
+    const result = await authenticateApiKey(
+      new Request("http://localhost:3050/v1/chat/completions", {
+        headers: { Authorization: `Bearer ${created.key}` },
+      })
+    );
+    expect(result).toBeNull();
   });
 });
