@@ -1,7 +1,17 @@
 import { Elysia, t } from "elysia";
 import { authenticateApiKey } from "../lib/gateway-auth";
+import { checkRateLimit } from "../lib/rate-limiter";
+import type { RateLimitResult } from "../lib/rate-limiter";
 import { resolveProvider } from "../providers";
 import type { AIProvider, ChatMessage } from "../providers";
+
+function rateLimitHeaders(rateLimit: RateLimitResult): Record<string, string> {
+  return {
+    "x-ratelimit-limit": String(rateLimit.limit),
+    "x-ratelimit-remaining": String(rateLimit.remaining),
+    "x-ratelimit-reset": String(rateLimit.resetAt),
+  };
+}
 
 function openAiError(
   message: string,
@@ -12,6 +22,16 @@ function openAiError(
       message,
       type: "invalid_request_error",
       code,
+    },
+  };
+}
+
+function rateLimitExceededError(limit: number) {
+  return {
+    error: {
+      message: `Rate limit exceeded. Maximum ${limit} requests per minute.`,
+      type: "rate_limit_error",
+      code: "rate_limit_exceeded",
     },
   };
 }
@@ -81,6 +101,20 @@ export const chatCompletionsRoutes = new Elysia({ prefix: "/v1" }).post(
       );
     }
 
+    const rateLimit = await checkRateLimit(
+      authenticated.keyId,
+      authenticated.rateLimitRpm
+    );
+    // Set on `set.headers` for every non-streaming outcome below (429, 404,
+    // 200 JSON); the streaming success path returns a raw Response, which
+    // bypasses `set` entirely, so it merges the same headers itself.
+    Object.assign(set.headers, rateLimitHeaders(rateLimit));
+
+    if (!rateLimit.allowed) {
+      set.status = 429;
+      return rateLimitExceededError(rateLimit.limit);
+    }
+
     const provider = resolveProvider(body.model);
     if (!provider) {
       set.status = 404;
@@ -107,6 +141,7 @@ export const chatCompletionsRoutes = new Elysia({ prefix: "/v1" }).post(
           "content-type": "text/event-stream",
           "cache-control": "no-cache",
           connection: "keep-alive",
+          ...rateLimitHeaders(rateLimit),
         },
       });
     }
