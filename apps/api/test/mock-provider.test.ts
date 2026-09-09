@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { MockProvider } from "../src/providers/mock-provider";
+import { MockProvider, STREAM_CHUNK_DELAY_MS } from "../src/providers/mock-provider";
 
 describe("MockProvider", () => {
   const provider = new MockProvider();
@@ -47,5 +47,41 @@ describe("MockProvider", () => {
     expect(short.usage.totalTokens).toBe(
       short.usage.promptTokens + short.usage.completionTokens
     );
+  });
+
+  it("streams the same content as the non-streaming response, split into multiple chunks", async () => {
+    const request = {
+      model: "mock-gpt-4o",
+      messages: [{ role: "user" as const, content: "What is the capital of France?" }],
+    };
+
+    const full = await provider.createChatCompletion(request);
+
+    const chunks: string[] = [];
+    for await (const chunk of provider.chatCompletionStream(request)) {
+      chunks.push(chunk.content);
+    }
+
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.join("")).toBe(full.content);
+  });
+
+  it("waits at least STREAM_CHUNK_DELAY_MS between chunks", async () => {
+    const timestamps: number[] = [];
+
+    for await (const _chunk of provider.chatCompletionStream({
+      model: "mock-gpt-4o",
+      messages: [{ role: "user", content: "Hello there, this is a longer message" }],
+    })) {
+      timestamps.push(performance.now());
+    }
+
+    expect(timestamps.length).toBeGreaterThan(1);
+    for (let i = 1; i < timestamps.length; i++) {
+      // Allow 1ms of timer jitter below the nominal delay.
+      expect(timestamps[i] - timestamps[i - 1]).toBeGreaterThanOrEqual(
+        STREAM_CHUNK_DELAY_MS - 1
+      );
+    }
   });
 });

@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { authenticateApiKey } from "../lib/gateway-auth";
 import { resolveProvider } from "../providers";
+import type { AIProvider, ChatMessage } from "../providers";
 
 function openAiError(
   message: string,
@@ -13,6 +14,59 @@ function openAiError(
       code,
     },
   };
+}
+
+function streamChatCompletion(
+  provider: AIProvider,
+  id: string,
+  created: number,
+  model: string,
+  messages: ChatMessage[]
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const iterator = provider
+    .chatCompletionStream({ model, messages })
+    [Symbol.asyncIterator]();
+
+  function chunkPayload(delta: Record<string, unknown>, finishReason: string | null) {
+    return `data: ${JSON.stringify({
+      id,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [{ index: 0, delta, finish_reason: finishReason }],
+    })}\n\n`;
+  }
+
+  return new ReadableStream({
+    async start(controller) {
+      try {
+        controller.enqueue(encoder.encode(chunkPayload({ role: "assistant" }, null)));
+        for (
+          let next = await iterator.next();
+          !next.done;
+          next = await iterator.next()
+        ) {
+          controller.enqueue(
+            encoder.encode(chunkPayload({ content: next.value.content }, null))
+          );
+        }
+        controller.enqueue(encoder.encode(chunkPayload({}, "stop")));
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      } catch (err) {
+        console.error("chat-completions: streaming failed", err);
+        try {
+          controller.error(err);
+        } catch {
+          // stream already closed/errored, e.g. the client disconnected
+        }
+      }
+    },
+    cancel() {
+      iterator.return?.();
+    },
+  });
 }
 
 export const chatCompletionsRoutes = new Elysia({ prefix: "/v1" }).post(
@@ -36,15 +90,36 @@ export const chatCompletionsRoutes = new Elysia({ prefix: "/v1" }).post(
       );
     }
 
+    const id = `chatcmpl-${crypto.randomUUID()}`;
+    const created = Math.floor(Date.now() / 1000);
+
+    if (body.stream) {
+      const stream = streamChatCompletion(
+        provider,
+        id,
+        created,
+        body.model,
+        body.messages
+      );
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache",
+          connection: "keep-alive",
+        },
+      });
+    }
+
     const result = await provider.createChatCompletion({
       model: body.model,
       messages: body.messages,
     });
 
     return {
-      id: `chatcmpl-${crypto.randomUUID()}`,
+      id,
       object: "chat.completion",
-      created: Math.floor(Date.now() / 1000),
+      created,
       model: body.model,
       choices: [
         {
@@ -74,6 +149,7 @@ export const chatCompletionsRoutes = new Elysia({ prefix: "/v1" }).post(
         }),
         { minItems: 1 }
       ),
+      stream: t.Optional(t.Boolean()),
     }),
   }
 );

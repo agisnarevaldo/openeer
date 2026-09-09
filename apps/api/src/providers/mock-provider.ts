@@ -1,14 +1,24 @@
 import type {
   AIProvider,
+  ChatCompletionChunk,
   ChatCompletionRequest,
   ChatCompletionResult,
 } from "./types";
 
 const CHARS_PER_TOKEN = 4;
 const ROLE_OVERHEAD_TOKENS = 1;
+export const STREAM_CHUNK_DELAY_MS = 5;
 
 function estimateTokens(text: string): number {
   return Math.max(1, Math.ceil(text.length / CHARS_PER_TOKEN));
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function splitIntoWordChunks(text: string): string[] {
+  return text.match(/\S+\s*/g) ?? [text];
 }
 
 export class MockProvider implements AIProvider {
@@ -39,5 +49,16 @@ export class MockProvider implements AIProvider {
         totalTokens: promptTokens + completionTokens,
       },
     };
+  }
+
+  async *chatCompletionStream(
+    request: ChatCompletionRequest
+  ): AsyncIterable<ChatCompletionChunk> {
+    const { content } = this.createChatCompletion(request);
+
+    for (const word of splitIntoWordChunks(content)) {
+      await delay(STREAM_CHUNK_DELAY_MS);
+      yield { content: word };
+    }
   }
 }

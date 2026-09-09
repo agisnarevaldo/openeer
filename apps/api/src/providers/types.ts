@@ -21,8 +21,15 @@ export interface ChatCompletionResult {
   usage: ChatCompletionUsage;
 }
 
+export interface ChatCompletionChunk {
+  content: string;
+}
+
 export interface AIProvider {
   createChatCompletion(
     request: ChatCompletionRequest
   ): Promise<ChatCompletionResult> | ChatCompletionResult;
+  chatCompletionStream(
+    request: ChatCompletionRequest
+  ): AsyncIterable<ChatCompletionChunk>;
 }
