@@ -76,7 +76,7 @@ packages/
    http://localhost:8088
    ```
 
-   Use this URL, not `localhost:5173` directly — the dashboard's cookies and API calls rely on Caddy routing `/api/*` and `/v1/*` to the API on the same origin.
+   > ⚠️ **Always use `localhost:8088`, never `localhost:5173`.** Vite only serves the SvelteKit app on 5173 — it does not proxy `/api/*`. If you open `localhost:5173` directly, Better Auth's client (which posts to `window.location.origin + /api/auth/...`) will hit a route that doesn't exist on the Vite dev server, and **register/login will silently fail with a 404**. Caddy on 8088 is what routes `/api/*` and `/v1/*` to the API and everything else to the web app on one origin — that's the URL to use in your browser.
 
 7. **Try it out:**
    - Register an account and sign in.
@@ -94,6 +94,18 @@ packages/
      ```
 
 ### Stopping
+
+Stop the API and web dev servers with `Ctrl+C` in their terminals.
+
+> On Windows, if you're running them from **Git Bash**, `Ctrl+C` often doesn't reach `bun.exe` (a known Git Bash/MinTTY limitation with native Windows processes) and the server keeps running. If that happens, run this from any terminal instead:
+>
+> ```sh
+> bun run stop
+> ```
+>
+> This finds and kills whatever is listening on the dev server ports (3050 and 5173). Alternatively, run the dev servers from PowerShell or cmd.exe instead of Git Bash, where `Ctrl+C` works normally.
+
+Stop the Docker infrastructure (Postgres, Redis, Caddy) with:
 
 ```sh
 bun run docker:down
@@ -127,6 +139,16 @@ cd apps/api && bun run check
 cd apps/web && bun run check
 cd packages/db && bun run check
 ```
+
+## Troubleshooting
+
+**Register/login fails or hangs.** You're almost certainly on `localhost:5173` instead of `localhost:8088`. Open `http://localhost:8088` — see the warning in step 6 above.
+
+**`Ctrl+C` doesn't stop the dev servers.** Known Git Bash/Windows issue, not a project bug. Run `bun run stop` from any terminal to kill whatever is bound to ports 3050 and 5173, or start the dev servers from PowerShell/cmd.exe instead.
+
+**Port already in use / stale process from a previous run.** Run `bun run stop` first, then restart `bun run dev:api` / `bun run dev:web`.
+
+**Dashboard/API can't reach Postgres or Redis.** Confirm the containers are up and healthy with `docker compose ps`; start them with `bun run docker:up` if not.
 
 ## Documentation
 

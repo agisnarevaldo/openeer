@@ -10,7 +10,8 @@
     "dev:web": "bun --filter @openeer/web dev",
     "test": "bun test",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "stop": "bun scripts/stop-dev.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",
