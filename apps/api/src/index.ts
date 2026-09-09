@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { auth } from "./auth";
 import { ALLOWED_ORIGINS } from "./constants";
+import { keysRoutes } from "./routes/keys";
 
 export const app = new Elysia()
   .use(
@@ -13,6 +14,7 @@ export const app = new Elysia()
     })
   )
   .all("/api/auth/*", ({ request }) => auth.handler(request))
+  .use(keysRoutes)
   .get("/health", () => ({ status: "ok" }));
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3050;
