@@ -1,4 +1,6 @@
-export const API_KEY_PREFIX = "op_live_";
+import { API_KEY_PREFIX, hashApiKey } from "@openeer/db";
+
+export { API_KEY_PREFIX, hashApiKey };
 export const DEFAULT_RATE_LIMIT_RPM = 60;
 
 const SECRET_BYTE_LENGTH = 32;
@@ -22,8 +24,4 @@ export function generateApiKey(): GeneratedApiKey {
     prefix: API_KEY_PREFIX,
     lastFour: key.slice(-4),
   };
-}
-
-export function hashApiKey(key: string): string {
-  return new Bun.CryptoHasher("sha256").update(key).digest("hex");
 }

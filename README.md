@@ -54,7 +54,18 @@ packages/
    cd ../..
    ```
 
-4. **Start the API server** (in one terminal):
+4. **(Optional) Seed a default developer account and demo API key:**
+
+   ```sh
+   bun run db:seed
+   ```
+
+   Seeds `dev@openeer.local` / `openeer123` and an active demo key
+   (`op_live_demo1234567890abcdef1234567890ab`) so you can sign in and call
+   the gateway immediately without registering manually. Safe to re-run —
+   it upserts the same rows every time.
+
+5. **Start the API server** (in one terminal):
 
    ```sh
    bun run dev:api
@@ -62,7 +73,7 @@ packages/
 
    Runs on `http://localhost:3050`.
 
-5. **Start the web app** (in another terminal):
+6. **Start the web app** (in another terminal):
 
    ```sh
    bun run dev:web
@@ -70,7 +81,7 @@ packages/
 
    Runs on `http://localhost:5173`.
 
-6. **Open the app through the Caddy gateway:**
+7. **Open the app through the Caddy gateway:**
 
    ```
    http://localhost:8088
@@ -78,9 +89,9 @@ packages/
 
    > ⚠️ **Always use `localhost:8088`, never `localhost:5173`.** Vite only serves the SvelteKit app on 5173 — it does not proxy `/api/*`. If you open `localhost:5173` directly, Better Auth's client (which posts to `window.location.origin + /api/auth/...`) will hit a route that doesn't exist on the Vite dev server, and **register/login will silently fail with a 404**. Caddy on 8088 is what routes `/api/*` and `/v1/*` to the API and everything else to the web app on one origin — that's the URL to use in your browser.
 
-7. **Try it out:**
-   - Register an account and sign in.
-   - Go to **Dashboard → API Keys** and create a key. Copy the plaintext secret shown once (`op_live_...`).
+8. **Try it out:**
+   - Sign in with the seeded account (`dev@openeer.local` / `openeer123`) if you ran `bun run db:seed`, or register a new account.
+   - Go to **Dashboard → API Keys** and create a key (or reuse the seeded demo key). Copy the plaintext secret shown once (`op_live_...`).
    - Call the gateway with the key:
 
      ```sh
@@ -92,6 +103,16 @@ packages/
          "messages": [{ "role": "user", "content": "Hello!" }]
        }'
      ```
+
+### Smoke testing
+
+Once the seeded stack is fully up (containers, `db:seed`, `dev:api`, `dev:web`), verify everything is wired together correctly:
+
+```sh
+bun run smoke
+```
+
+This runs a real HTTP cycle against `http://localhost:8088`: login as the seeded developer account, list API keys, send a chat completion with the demo key, and confirm it shows up in request logs. Exits non-zero if any step fails.
 
 ### Stopping
 
@@ -140,9 +161,15 @@ cd apps/web && bun run check
 cd packages/db && bun run check
 ```
 
+Run the end-to-end smoke test against a live, seeded stack (see [Smoke testing](#smoke-testing) above):
+
+```sh
+bun run smoke
+```
+
 ## Troubleshooting
 
-**Register/login fails or hangs.** You're almost certainly on `localhost:5173` instead of `localhost:8088`. Open `http://localhost:8088` — see the warning in step 6 above.
+**Register/login fails or hangs.** You're almost certainly on `localhost:5173` instead of `localhost:8088`. Open `http://localhost:8088` — see the warning in step 7 above.
 
 **`Ctrl+C` doesn't stop the dev servers.** Known Git Bash/Windows issue, not a project bug. Run `bun run stop` from any terminal to kill whatever is bound to ports 3050 and 5173, or start the dev servers from PowerShell/cmd.exe instead.
 

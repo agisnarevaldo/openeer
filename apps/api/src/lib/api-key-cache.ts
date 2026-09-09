@@ -1,18 +1,16 @@
+import { API_KEY_CACHE_KEY_PREFIX, API_KEY_CACHE_TTL_SECONDS } from "@openeer/db";
+import type { CachedApiKey } from "@openeer/db";
 import { redis } from "../redis";
 
-const CACHE_KEY_PREFIX = "api-key:";
+export type { CachedApiKey };
+
+const CACHE_KEY_PREFIX = API_KEY_CACHE_KEY_PREFIX;
 const REVOKED_KEY_PREFIX = "api-key:revoked:";
-const CACHE_TTL_SECONDS = 60;
+const CACHE_TTL_SECONDS = API_KEY_CACHE_TTL_SECONDS;
 // Must comfortably exceed the time a concurrent authenticateApiKey() call can
 // spend between its DB read and its cache write, so a revoke that lands in
 // that window can't be undone by a stale write. See invalidateCachedApiKey.
 const REVOKED_TOMBSTONE_TTL_SECONDS = 30;
-
-export interface CachedApiKey {
-  userId: string;
-  keyId: string;
-  rateLimitRpm: number;
-}
 
 function cacheKey(hash: string): string {
   return `${CACHE_KEY_PREFIX}${hash}`;

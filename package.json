@@ -11,7 +11,9 @@
     "test": "bun test",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "stop": "bun scripts/stop-dev.ts"
+    "stop": "bun scripts/stop-dev.ts",
+    "db:seed": "bun --filter @openeer/db db:seed",
+    "smoke": "bun scripts/smoke.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",

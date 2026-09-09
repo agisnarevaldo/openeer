@@ -57,7 +57,9 @@
         "uuidv7": "^1.2.1",
       },
       "devDependencies": {
+        "better-auth": "^1.7.3",
         "drizzle-kit": "^0.30.4",
+        "ioredis": "^6.0.0",
         "typescript": "^5.7.3",
       },
     },
