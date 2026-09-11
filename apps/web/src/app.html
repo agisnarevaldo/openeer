@@ -1,8 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
+  <!--
+    `class="dark"` above is hardcoded for now: the product is dark-only (see
+    issue #13 for light-mode support). A future toggle needs to remove this
+    hardcoded class, mount mode-watcher's <ModeWatcher /> to drive it live,
+    and remove the matching hardcoded `theme="dark"` on <Toaster /> in
+    routes/+layout.svelte.
+  -->
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+    <link rel="icon" href="%sveltekit.assets%/brand/Openeer-Icon-BgBlack.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Openeer — AI Gateway</title>
     %sveltekit.head%

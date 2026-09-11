@@ -41,7 +41,7 @@
   <Card class="w-full max-w-md p-8 shadow-2xl">
     <div class="mb-6 text-center">
       <div class="inline-flex items-center justify-center gap-2 mb-2">
-        <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white">
+        <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center font-bold text-primary-foreground">
           O
         </div>
         <span class="text-2xl font-bold tracking-tight">Openeer</span>

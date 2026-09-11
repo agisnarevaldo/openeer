@@ -8,7 +8,8 @@
   "scripts": {
     "dev:api": "bun --filter @openeer/api dev",
     "dev:web": "bun --filter @openeer/web dev",
-    "test": "bun test",
+    "test": "bun test apps/api apps/web/test packages/db && bun run test:web",
+    "test:web": "bun --filter @openeer/web test:unit",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "stop": "bun scripts/stop-dev.ts",
