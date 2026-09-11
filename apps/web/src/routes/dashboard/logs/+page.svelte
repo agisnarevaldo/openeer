@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
   import { Card } from "$lib/components/ui/card";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "$lib/components/ui/table";
 
   interface RequestLogEntry {
     id: string;
@@ -143,38 +145,34 @@
         No request logs yet. Send a request to the Gateway to see it here.
       </div>
     {:else}
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <th class="px-5 py-3 font-medium">Status</th>
-              <th class="px-5 py-3 font-medium">Model</th>
-              <th class="px-5 py-3 font-medium">Tokens</th>
-              <th class="px-5 py-3 font-medium">Latency</th>
-              <th class="px-5 py-3 font-medium">Created</th>
-              <th class="px-5 py-3 font-medium">Error</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each logs as log (log.id)}
-              <tr class="border-b border-border/60 last:border-0">
-                <td class="px-5 py-3">
-                  <span class={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(log.statusCode)}`}>
-                    {log.statusCode}
-                  </span>
-                </td>
-                <td class="px-5 py-3 font-mono text-xs">{log.model}</td>
-                <td class="px-5 py-3 text-muted-foreground">{log.totalTokens}</td>
-                <td class={`px-5 py-3 font-medium ${latencyClass(log.latencyMs)}`}>{log.latencyMs}ms</td>
-                <td class="px-5 py-3 text-muted-foreground whitespace-nowrap">{formatDate(log.createdAt)}</td>
-                <td class="px-5 py-3 max-w-[220px] truncate text-xs text-destructive/80">
-                  {log.errorMessage || "—"}
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Status</TableHead>
+            <TableHead>Model</TableHead>
+            <TableHead>Tokens</TableHead>
+            <TableHead>Latency</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Error</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {#each logs as log (log.id)}
+            <TableRow>
+              <TableCell>
+                <Badge class={statusBadgeClass(log.statusCode)}>{log.statusCode}</Badge>
+              </TableCell>
+              <TableCell class="font-mono text-xs">{log.model}</TableCell>
+              <TableCell class="text-muted-foreground">{log.totalTokens}</TableCell>
+              <TableCell class={`font-medium ${latencyClass(log.latencyMs)}`}>{log.latencyMs}ms</TableCell>
+              <TableCell class="text-muted-foreground whitespace-nowrap">{formatDate(log.createdAt)}</TableCell>
+              <TableCell class="max-w-[220px] truncate text-xs text-destructive/80">
+                {log.errorMessage || "—"}
+              </TableCell>
+            </TableRow>
+          {/each}
+        </TableBody>
+      </Table>
 
       <div class="flex items-center justify-between border-t border-border px-5 py-3 text-sm">
         <span class="text-muted-foreground">Page {page} of {totalPages} ({total} total)</span>
