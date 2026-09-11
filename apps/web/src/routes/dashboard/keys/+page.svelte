@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { toast } from "svelte-sonner";
   import { Button } from "$lib/components/ui/button";
   import { Card } from "$lib/components/ui/card";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
   import * as Dialog from "$lib/components/ui/dialog";
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "$lib/components/ui/table";
 
   interface ApiKeySummary {
     id: string;
@@ -80,6 +82,7 @@
       }
 
       revealedKey = body.key;
+      toast.success("API key created");
       await loadKeys();
     } catch (err: any) {
       createError = err?.message || "Failed to create API key";
@@ -91,14 +94,22 @@
   async function copyKey() {
     await navigator.clipboard.writeText(revealedKey);
     copied = true;
+    toast.success("Copied to clipboard");
   }
 
   async function revokeKey(key: ApiKeySummary) {
     if (!confirm(`Revoke "${key.name}"? This cannot be undone.`)) return;
 
-    const res = await fetch(`/api/keys/${key.id}`, { method: "DELETE" });
-    if (res.ok) {
-      keys = keys.filter((k) => k.id !== key.id);
+    try {
+      const res = await fetch(`/api/keys/${key.id}`, { method: "DELETE" });
+      if (res.ok) {
+        keys = keys.filter((k) => k.id !== key.id);
+        toast.success(`"${key.name}" revoked`);
+      } else {
+        toast.error(`Failed to revoke "${key.name}"`);
+      }
+    } catch {
+      toast.error(`Failed to revoke "${key.name}"`);
     }
   }
 
@@ -129,39 +140,39 @@
         No API keys yet. Create one to start making requests.
       </div>
     {:else}
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <th class="px-5 py-3 font-medium">Name</th>
-            <th class="px-5 py-3 font-medium">Key</th>
-            <th class="px-5 py-3 font-medium">Rate limit</th>
-            <th class="px-5 py-3 font-medium">Created</th>
-            <th class="px-5 py-3 font-medium">Last used</th>
-            <th class="px-5 py-3 font-medium"></th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Key</TableHead>
+            <TableHead>Rate limit</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Last used</TableHead>
+            <TableHead class="text-right"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {#each keys as key (key.id)}
-            <tr class="border-b border-border/60 last:border-0">
-              <td class="px-5 py-3 font-medium">{key.name}</td>
-              <td class="px-5 py-3 font-mono text-xs text-muted-foreground">
+            <TableRow>
+              <TableCell class="font-medium">{key.name}</TableCell>
+              <TableCell class="font-mono text-xs text-muted-foreground">
                 {key.keyPrefix}...{key.lastFour}
-              </td>
-              <td class="px-5 py-3 text-muted-foreground">{key.rateLimitRpm} rpm</td>
-              <td class="px-5 py-3 text-muted-foreground">{formatDate(key.createdAt)}</td>
-              <td class="px-5 py-3 text-muted-foreground">{formatDate(key.lastUsedAt)}</td>
-              <td class="px-5 py-3 text-right">
+              </TableCell>
+              <TableCell class="text-muted-foreground">{key.rateLimitRpm} rpm</TableCell>
+              <TableCell class="text-muted-foreground">{formatDate(key.createdAt)}</TableCell>
+              <TableCell class="text-muted-foreground">{formatDate(key.lastUsedAt)}</TableCell>
+              <TableCell class="text-right">
                 <button
                   onclick={() => revokeKey(key)}
                   class="cursor-pointer text-xs font-medium text-destructive/80 transition-colors hover:text-destructive"
                 >
                   Revoke
                 </button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           {/each}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     {/if}
   </Card>
 </div>
