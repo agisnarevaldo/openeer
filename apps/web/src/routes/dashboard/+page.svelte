@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { useSession } from "$lib/auth-client";
+  import MetricCard from "$lib/components/metric-card.svelte";
 
   const session = useSession();
 
@@ -54,53 +55,41 @@
       </div>
     {:else}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="rounded-xl border border-border bg-card p-5">
-          <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Requests</div>
-          <div class="mt-2 text-2xl font-bold">
+        <MetricCard label="Total Requests" description="Requests to the Gateway">
+          <span class="text-2xl font-bold">
             {metricsLoading ? "—" : formatNumber(metrics?.totalRequests ?? 0)}
-          </div>
-          <div class="mt-1 text-xs text-muted-foreground">Requests to the Gateway</div>
-        </div>
+          </span>
+        </MetricCard>
 
-        <div class="rounded-xl border border-border bg-card p-5">
-          <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Tokens</div>
-          <div class="mt-2 text-2xl font-bold">
+        <MetricCard label="Total Tokens" description="Prompt + completion tokens">
+          <span class="text-2xl font-bold">
             {metricsLoading ? "—" : formatNumber(metrics?.totalTokens ?? 0)}
-          </div>
-          <div class="mt-1 text-xs text-muted-foreground">Prompt + completion tokens</div>
-        </div>
+          </span>
+        </MetricCard>
 
-        <div class="rounded-xl border border-border bg-card p-5">
-          <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Avg Latency</div>
-          <div class="mt-2 text-2xl font-bold">
+        <MetricCard label="Avg Latency" description="Across all requests">
+          <span class="text-2xl font-bold">
             {metricsLoading ? "—" : `${formatNumber(metrics?.avgLatencyMs ?? 0)}ms`}
-          </div>
-          <div class="mt-1 text-xs text-muted-foreground">Across all requests</div>
-        </div>
+          </span>
+        </MetricCard>
       </div>
     {/if}
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="rounded-xl border border-border bg-card p-5">
-      <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gateway Status</div>
-      <div class="mt-2 text-2xl font-bold text-emerald-400 flex items-center gap-2">
+    <MetricCard label="Gateway Status" description="Port 3050 (API) / Port 8088 (Gateway)">
+      <span class="text-2xl font-bold text-emerald-400 flex items-center gap-2">
         <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping"></span>
         Operational
-      </div>
-      <div class="mt-1 text-xs text-muted-foreground">Port 3050 (API) / Port 8088 (Gateway)</div>
-    </div>
+      </span>
+    </MetricCard>
 
-    <div class="rounded-xl border border-border bg-card p-5">
-      <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Authenticated User</div>
-      <div class="mt-2 text-lg font-semibold truncate">{$session.data?.user?.email}</div>
-      <div class="mt-1 text-xs text-muted-foreground">Authenticated via Better Auth</div>
-    </div>
+    <MetricCard label="Authenticated User" description="Authenticated via Better Auth">
+      <span class="text-lg font-semibold truncate block">{$session.data?.user?.email}</span>
+    </MetricCard>
 
-    <div class="rounded-xl border border-border bg-card p-5">
-      <div class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active AI Providers</div>
-      <div class="mt-2 text-2xl font-bold">1 Provider</div>
-      <div class="mt-1 text-xs text-muted-foreground">Mock Provider (mock-gpt-4o)</div>
-    </div>
+    <MetricCard label="Active AI Providers" description="Mock Provider (mock-gpt-4o)">
+      <span class="text-2xl font-bold">1 Provider</span>
+    </MetricCard>
   </div>
 </div>
