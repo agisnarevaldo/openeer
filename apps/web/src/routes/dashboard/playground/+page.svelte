@@ -3,6 +3,8 @@
   import { Card } from "$lib/components/ui/card";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
+  import * as Select from "$lib/components/ui/select";
+  import { Switch } from "$lib/components/ui/switch";
 
   interface ChatMessage {
     role: "user" | "assistant";
@@ -211,24 +213,20 @@
 
       <div>
         <Label for="playground-model">Model</Label>
-        <select
-          id="playground-model"
-          bind:value={model}
-          class="flex h-10 w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {#each MODELS as m (m)}
-            <option value={m}>{m}</option>
-          {/each}
-        </select>
+        <Select.Root type="single" bind:value={model}>
+          <Select.Trigger id="playground-model" class="w-full">
+            {model}
+          </Select.Trigger>
+          <Select.Content>
+            {#each MODELS as m (m)}
+              <Select.Item value={m}>{m}</Select.Item>
+            {/each}
+          </Select.Content>
+        </Select.Root>
       </div>
 
       <div class="flex items-center gap-2 pb-2">
-        <input
-          id="playground-streaming"
-          type="checkbox"
-          bind:checked={streaming}
-          class="h-4 w-4 rounded border-border accent-primary"
-        />
+        <Switch id="playground-streaming" bind:checked={streaming} />
         <Label for="playground-streaming" class="mb-0">Stream (SSE)</Label>
       </div>
     </div>
